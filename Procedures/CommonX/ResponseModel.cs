@@ -15,6 +15,6 @@ namespace CommonX
 
     public class ResponseDataModel<T> : ResponseModel, IResponseDataModel<T>
     {
-        public List<T> Data { get; set; }
+        public List<T> Data { get; set; } = null;
     }
 }

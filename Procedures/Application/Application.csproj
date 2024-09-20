@@ -9,7 +9,6 @@
   <ItemGroup>
     <Folder Include="FileUpload\Commands\" />
     <Folder Include="FileUpload\Queries\" />
-    <Folder Include="Interface\Persistence\" />
   </ItemGroup>
 
   <ItemGroup>
