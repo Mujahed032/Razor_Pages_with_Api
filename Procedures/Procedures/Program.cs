@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Repository.Data;
+
 namespace Procedures
 {
     public class Program
@@ -8,6 +11,9 @@ namespace Procedures
 
             // Add services to the container.
             builder.Services.AddRazorPages();
+            builder.Services.AddDbContext<ApplicationDbContext>( options => 
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+                b => b.MigrationsAssembly("Procedures")));
 
             var app = builder.Build();
 
