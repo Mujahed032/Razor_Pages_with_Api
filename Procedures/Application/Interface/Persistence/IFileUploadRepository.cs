@@ -5,6 +5,6 @@ namespace Application.Interface.Persistence
 {
     public interface IFileUploadRepository
     {
-        Task<IResponseDataModel<FileUpload>> AddFileAsync(List<FileUpload> file);
+        Task<IResponseDataModel<Domain.Concrete.Models.FileUpload>> AddFileAsync(List<FileUpload> file);
     }
 }

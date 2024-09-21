@@ -1,4 +1,8 @@
+using Application.FileManagement.Commands;
+using Application.Interface.Persistence;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Repository.Concrete;
 using Repository.Data;
 
 namespace Procedures
@@ -11,6 +15,8 @@ namespace Procedures
 
             // Add services to the container.
             builder.Services.AddRazorPages();
+            builder.Services.AddScoped<IFileUploadRepository, FileUploadRepository>();
+            builder.Services.AddMediatR(typeof(CreateForm.UploadFilesCommandHandler).Assembly);
             builder.Services.AddDbContext<ApplicationDbContext>( options => 
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
                 b => b.MigrationsAssembly("Procedures")));

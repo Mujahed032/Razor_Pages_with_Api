@@ -1,0 +1,35 @@
+﻿@page
+@model UploadFileModel
+@{
+    ViewData["Title"] = "Upload File";
+}
+
+<h2>Upload Excel File</h2>
+
+<!-- Success Message -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- Error Message -->
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<form method="post" enctype="multipart/form-data">
+    <div class="form-group mb-3">
+        <label for="file">Upload Excel File</label>
+        <div class="col-md-6">
+            <input type="file" id="file" name="ExcelFile" class="form-control" required />
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Upload</button>
+</form>
