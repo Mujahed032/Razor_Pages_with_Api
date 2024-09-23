@@ -29,7 +29,6 @@ namespace Repository.Concrete
 
                 foreach (var file in files)
                 {
-                    // Check if a file with the same FilePath already exists
                     var existingFile = await _context.Files
                         .FirstOrDefaultAsync(f => f.FilePath == file.FilePath);
 

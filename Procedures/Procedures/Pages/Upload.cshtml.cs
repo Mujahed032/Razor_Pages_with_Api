@@ -14,6 +14,7 @@ public class UploadFileModel : PageModel
         _mediator = mediator;
     }
 
+    // Property to hold the uploaded Excel file. BindProperty attribute ensures that the file is bound to the model when the form is submitted.
     [BindProperty]
     public IFormFile ExcelFile { get; set; }
 
@@ -25,15 +26,19 @@ public class UploadFileModel : PageModel
             return Page();
         }
 
+        // Create a MemoryStream to store the content of the uploaded file in memory.
         using var memoryStream = new MemoryStream();
+
+        // Copy the content of the uploaded Excel file to the MemoryStream asynchronously.
         await ExcelFile.CopyToAsync(memoryStream);
 
+        // Use MediatR to send a command to process the file content (as a byte array).
         var result = await _mediator.Send(new CreateForm.UploadFilesCommand(memoryStream.ToArray()));
 
         if (result.Success)
         {
             TempData["SuccessMessage"] = "File(s) uploaded successfully!";
-            return Page();  // or use Page() to stay on the same page
+            return Page(); 
         }
 
         TempData["ErrorMessage"] = result.Message ?? "Failed to upload file(s).";
