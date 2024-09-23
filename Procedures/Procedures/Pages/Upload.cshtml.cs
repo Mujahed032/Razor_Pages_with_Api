@@ -33,7 +33,7 @@ public class UploadFileModel : PageModel
         if (result.Success)
         {
             TempData["SuccessMessage"] = "File(s) uploaded successfully!";
-            return RedirectToPage("Success");  // or use Page() to stay on the same page
+            return Page();  // or use Page() to stay on the same page
         }
 
         TempData["ErrorMessage"] = result.Message ?? "Failed to upload file(s).";
