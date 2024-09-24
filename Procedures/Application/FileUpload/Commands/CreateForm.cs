@@ -1,7 +1,7 @@
 ﻿using Application.Interface.Persistence;
 using CommonX;
 using MediatR;
-using OfficeOpenXml;
+using ClosedXML.Excel;
 using Domain.Concrete.Models;
 using System.IO;
 
@@ -22,6 +22,16 @@ namespace Application.FileManagement.Commands
 
             public async Task<ResponseDataModel<FileUpload>> Handle(UploadFilesCommand request, CancellationToken cancellationToken)
             {
+
+                if (!IsExcelFile(request.ExcelFileContent))
+                {
+                    return new ResponseDataModel<FileUpload>
+                    {
+                        Success = false,
+                        Message = "Invalid file type. Please upload an Excel file (.xlsx)."
+                    };
+                }
+
                 // Process Excel file to extract file names and paths
                 var filesToUpload = ProcessExcelFile(request.ExcelFileContent);
 
@@ -46,18 +56,14 @@ namespace Application.FileManagement.Commands
             // This method processes an Excel file (passed as a byte array) to extract file names and paths.
             private List<FileUpload> ProcessExcelFile(byte[] fileContent)
             {
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial; // Set the license context
-
                 // Create a memory stream from the byte array to load the Excel file content.
                 using var stream = new MemoryStream(fileContent);
 
-                // Load the ExcelPackage using the memory stream.
-                using var package = new ExcelPackage(stream);
+                // Load the Excel file using ClosedXML
+                using var workbook = new XLWorkbook(stream);
+                var worksheet = workbook.Worksheets.First(); // Get the first worksheet
 
-                // Get the first worksheet from the Excel workbook.
-                var worksheet = package.Workbook.Worksheets.First();
-
-                if (worksheet == null || worksheet.Dimension == null)
+                if (worksheet == null || worksheet.FirstRowUsed() == null)
                 {
                     throw new InvalidDataException("The Excel file is empty or invalid.");
                 }
@@ -65,13 +71,17 @@ namespace Application.FileManagement.Commands
                 // Create an empty list to store `FileUpload` objects, which will hold file data extracted from the worksheet.
                 var fileUploads = new List<FileUpload>();
 
-                for (int row = 2; row <= worksheet.Dimension.Rows; row++)  // Assuming first row is header
-                {
-                    // Extract the file name from the first column (assumed to be in column 1).
-                    var fileName = worksheet.Cells[row, 1].Text;
+                // Iterate over the rows starting from the second row (to skip header)
+                var firstRow = worksheet.FirstRowUsed().RowNumber();
+                var lastRow = worksheet.LastRowUsed().RowNumber();
 
-                    // Extract the file path from the second column (assumed to be in column 2).
-                    var filePath = worksheet.Cells[row, 2].Text;
+                for (int row = firstRow + 1; row <= lastRow; row++) // Assuming first row is header
+                {
+                    // Extract the file name from the first column (column A or 1).
+                    var fileName = worksheet.Cell(row, 1).GetString();
+
+                    // Extract the file path from the second column (column B or 2).
+                    var filePath = worksheet.Cell(row, 2).GetString();
 
                     if (string.IsNullOrWhiteSpace(fileName) || string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
                     {
@@ -92,6 +102,13 @@ namespace Application.FileManagement.Commands
                 }
 
                 return fileUploads;
+            }
+            // This method checks whether the file content is an Excel file by checking its signature (magic number).
+            private bool IsExcelFile(byte[] fileContent)
+            {
+                // Check if the file is in the ZIP format (Excel OpenXML .xlsx is a ZIP file)
+                // ZIP files start with these bytes: 0x50, 0x4B (PK)
+                return fileContent.Length >= 4 && fileContent[0] == 0x50 && fileContent[1] == 0x4B;
             }
         }
     }
